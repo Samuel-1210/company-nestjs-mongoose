@@ -23,6 +23,13 @@ export class CompanyRepository {
   async findOne(id: string) {
     return this.companyModel.findById(id).exec();
   }
+  async findByCnpj(cnpj: string) {
+    return this.companyModel.findOne({ cnpj }).exec();
+  }
+
+  async findActiveCompanies() {
+    return this.companyModel.find({ ativo: true }).exec();
+  }
 
   async update(id: string, updateCompanyDto: UpdateCompanyDto) {
     return this.companyModel

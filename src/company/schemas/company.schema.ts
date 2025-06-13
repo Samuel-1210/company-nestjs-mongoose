@@ -14,7 +14,7 @@ export class Company extends Document {
   telefone?: string;
 
   @Prop({ required: true })
-  cpnj: string;
+  cnpj: string;
 
   @Prop({ default: true })
   ativo: boolean;

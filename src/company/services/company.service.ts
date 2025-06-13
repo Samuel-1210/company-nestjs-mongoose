@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException, ConflictException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  ConflictException,
+} from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Company } from '../schemas/company.schema';
@@ -12,17 +16,15 @@ export class CompanyService {
   ) {}
 
   async create(createCompanyDto: CreateCompanyDto) {
-
     const existingCompany = await this.companyModel
       .findOne({ cnpj: createCompanyDto.cnpj })
       .exec();
-    
+
     if (existingCompany) {
       throw new ConflictException('Já existe uma empresa com este CNPJ');
     }
 
-    const createdCompany = new this.companyModel(createCompanyDto);
-    return await createdCompany.save();
+    return await this.companyModel.create(createCompanyDto);
   }
 
   async findAll() {
@@ -50,10 +52,13 @@ export class CompanyService {
   }
 
   async findActiveCompanies() {
-    const activeCompanies = await this.companyModel.find({ ativo: true }).exec();
-    if (activeCompanies.length === 0) {
+    const activeCompanies = await this.companyModel
+      .find({ ativo: true })
+      .exec();
+    if (!activeCompanies.length) {
       throw new NotFoundException('Nenhuma empresa ativa encontrada');
     }
+
     return activeCompanies;
   }
 
@@ -61,7 +66,7 @@ export class CompanyService {
     const updatedCompany = await this.companyModel
       .findByIdAndUpdate(id, updateCompanyDto, { new: true })
       .exec();
-    
+
     if (!updatedCompany) {
       throw new NotFoundException('Empresa não encontrada para atualização');
     }
