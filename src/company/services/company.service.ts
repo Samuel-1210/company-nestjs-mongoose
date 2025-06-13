@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException, ConflictException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Company } from '../schemas/company.schema';
@@ -12,25 +12,67 @@ export class CompanyService {
   ) {}
 
   async create(createCompanyDto: CreateCompanyDto) {
+
+    const existingCompany = await this.companyModel
+      .findOne({ cnpj: createCompanyDto.cnpj })
+      .exec();
+    
+    if (existingCompany) {
+      throw new ConflictException('Já existe uma empresa com este CNPJ');
+    }
+
     const createdCompany = new this.companyModel(createCompanyDto);
-    return createdCompany.save();
+    return await createdCompany.save();
   }
 
   async findAll() {
-    return this.companyModel.find().exec();
+    const companies = await this.companyModel.find().exec();
+    if (companies.length === 0) {
+      throw new NotFoundException('Nenhuma empresa encontrada');
+    }
+    return companies;
   }
 
   async findOne(id: string) {
-    return this.companyModel.findById(id).exec();
+    const company = await this.companyModel.findById(id).exec();
+    if (!company) {
+      throw new NotFoundException('Empresa não encontrada');
+    }
+    return company;
+  }
+
+  async findByCnpj(cnpj: string) {
+    const company = await this.companyModel.findOne({ cnpj }).exec();
+    if (!company) {
+      throw new NotFoundException('Nenhuma empresa encontrada com este CNPJ');
+    }
+    return company;
+  }
+
+  async findActiveCompanies() {
+    const activeCompanies = await this.companyModel.find({ ativo: true }).exec();
+    if (activeCompanies.length === 0) {
+      throw new NotFoundException('Nenhuma empresa ativa encontrada');
+    }
+    return activeCompanies;
   }
 
   async update(id: string, updateCompanyDto: UpdateCompanyDto) {
-    return this.companyModel
+    const updatedCompany = await this.companyModel
       .findByIdAndUpdate(id, updateCompanyDto, { new: true })
       .exec();
+    
+    if (!updatedCompany) {
+      throw new NotFoundException('Empresa não encontrada para atualização');
+    }
+    return updatedCompany;
   }
 
   async delete(id: string) {
-    return this.companyModel.findByIdAndDelete(id).exec();
+    const deletedCompany = await this.companyModel.findByIdAndDelete(id).exec();
+    if (!deletedCompany) {
+      throw new NotFoundException('Empresa não encontrada para exclusão');
+    }
+    return deletedCompany;
   }
 }
