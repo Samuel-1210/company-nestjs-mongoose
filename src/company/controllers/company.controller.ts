@@ -38,14 +38,14 @@ export class CompanyController {
     return await this.companyService.findOne(id);
   }
 
-  @Get('cnpj/:cnpj')
+  @Get('/cnpj/:cnpj')
   @ApiOperation({ summary: 'Buscar uma empresa pelo CNPJ' })
   @ApiParam({ name: 'cnpj', description: 'CNPJ da empresa' })
   async findByCnpj(@Param('cnpj') cnpj: string) {
     return await this.companyService.findByCnpj(cnpj);
   }
 
-  @Get('ativas')
+  @Get('/company/ativas')
   @ApiOperation({ summary: 'Listar empresas ativas' })
   async findActive() {
     return await this.companyService.findActiveCompanies();
