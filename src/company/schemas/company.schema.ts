@@ -1,3 +1,4 @@
+import { CompanyController } from './../controllers/company.controller';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document } from 'mongoose';
 
@@ -11,6 +12,9 @@ export class Company extends Document {
 
   @Prop()
   telefone?: string;
+
+  @Prop({ required: true })
+  cpnj: string;
 
   @Prop({ default: true })
   ativo: boolean;
